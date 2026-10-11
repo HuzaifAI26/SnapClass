@@ -23,3 +23,19 @@ def footer_dashboard():
         </div>
                 
                 """, unsafe_allow_html=True)
+    
+
+
+
+@st.dialog("Add Photos")
+def add_photos_dialog():
+    st.write("Upload student photos")
+
+    uploaded_files = st.file_uploader(
+        "Choose student photos",
+        type=["jpg", "jpeg", "png"],
+        accept_multiple_files=True
+    )
+
+    if uploaded_files:
+        st.success(f"{len(uploaded_files)} photo(s) selected.")
