@@ -1,41 +1,50 @@
 import streamlit as st
+from src.database.db import enroll_student_to_subject
+from src.database.config import supabase
+from PIL import Image
+import time
 
 
-def footer_home():
-    logo_url = "https://i.ibb.co/4r5X1FY/apnacollege.png"
-    
-    st.markdown(f"""
-        <div style="margin-top:2rem; display:flex; gap:6px; justify-content:center; items-align:center">
-        <p style="font-weight:bold; color:white;"> Created with ❤️ by </p>  
-        <img src='{logo_url}' style='max-height:25px' />
-        </div>
-                
-                """, unsafe_allow_html=True)
-
-
-def footer_dashboard():
-    logo_url = "https://i.ibb.co/4r5X1FY/apnacollege.png"
-    
-    st.markdown(f"""
-        <div style="margin-top:2rem; display:flex; gap:6px; justify-content:center; items-align:center">
-        <p style="font-weight:bold; color:black;"> Created with ❤️ by </p>  
-        <img src='{logo_url}' style='max-height:25px' />
-        </div>
-                
-                """, unsafe_allow_html=True)
-    
-
-
-
-@st.dialog("Add Photos")
+@st.dialog("Capture or upload photos")
 def add_photos_dialog():
-    st.write("Upload student photos")
 
-    uploaded_files = st.file_uploader(
-        "Choose student photos",
-        type=["jpg", "jpeg", "png"],
-        accept_multiple_files=True
-    )
+    st.write('Add classroom photos to scan for attendance')
 
-    if uploaded_files:
-        st.success(f"{len(uploaded_files)} photo(s) selected.")
+    if 'photo_tab' not in st.session_state:
+        st.session_state.photo_tab = 'camera'
+
+    t1, t2 = st.columns(2)
+
+    with t1:
+        type_camera = "primary" if st.session_state.photo_tab == 'camera' else 'tertiary'
+        if st.button('Camera', type=type_camera, width='stretch'):
+            st.session_state.photo_tab = 'camera'
+
+
+
+    with t2:
+        type_upload = "primary" if st.session_state.photo_tab == 'upload' else 'tertiary'
+        if st.button('Upload photos', type=type_upload, width='stretch'):
+            st.session_state.photo_tab = 'upload'
+
+    if st.session_state.photo_tab == 'camera':
+        cam_photo = st.camera_input('Take Snapshot', key='dialog_cam')
+        if cam_photo:
+            st.session_state.attendance_images.append(Image.open(cam_photo))
+            st.toast('Photo Captured')
+            st.rerun()
+
+
+    if st.session_state.photo_tab == 'upload':
+        uploaded_files = st.file_uploader( 'choose image files', type=['jpg', 'png', 'jpeg' ], accept_multiple_files=True, key='dialog_upload')
+
+        if uploaded_files:
+            for f in uploaded_files:
+                st.session_state.attendance_images.append(Image.open(f))
+            
+            st.toast('Photo Uploaded Successfully')
+            st.rerun()
+
+    st.divider()
+    if st.button('Done', type='primary', width='stretch'):
+        st.rerun()
