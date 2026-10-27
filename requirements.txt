@@ -14,7 +14,7 @@ supabase
 bcrypt
 
 
-
+resemblyzer
 segno
 pillow
 
